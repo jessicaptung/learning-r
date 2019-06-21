@@ -188,3 +188,44 @@ Beginner - Visualizing data with ggplot2 - workbook
 	library(janitor)
 	library(stringr)
 2. clean_names(): convert column names to lower case with _
+3. parse_number(chocolateData$cocoa_percent): remove percentage
+4. add color to points:
+	ggplot(data=chocolateData, aes(x=cocoa_percent, y=rating, color=review_date)) +
+		geom_point() +
+		geom_jitter() +
+		geom_smooth(method='lm') +
+		labs(title="Cocoa Percent vs. Rating", x="Cocoa Percent", y="Rating")
+5. unique(chocolate$bean_type)
+6. pick the first word: word(chocolateData$bean_type, 1)
+7. chocolateData$bean_type_simplified <- word(chocolateData$bean_type, 1)
+8. replace punctuations with nothing
+	chocolateData$bean_type_simplified <- gsub('[[:punct:]]', '', unique(chocolateData$bean_type_simplified))
+9. pick types which has more than 20 items
+	commonBeanTypes <- chocolateData %>%
+    	select(bean_type_simplified) %>%
+    	group_by(bean_type_simplified) %>%
+    	count() %>%
+    	filter(n>20) %>%
+    	select(bean_type_simplified)
+10. Pick the rows which belong to the types above
+	chocolateData_commonBeans <- chocolateData %>%
+	    filter(bean_type_simplified %in% commonBeanTypes$bean_type_simplified)
+11. Add data points on bars
+	ggplot(data=chocolateData_commonBeans, aes(x=bean_type_simplified, fill=bean_type_simplified)) +
+    geom_bar(position="dodge", size=2) +
+    geom_text(stat='count', aes(label=..count..), vjust=-1)
+12. By country
+	ggplot(data=chocolateData_commonBeans, aes(x=bean_type_simplified, fill=bean_type_simplified)) +
+    geom_bar(position="dodge", size=2) +
+    facet_wrap(c("company_location")) 
+13. Modify scale to show all bars
+	ggplot(data=chocolateData_commonBeans, aes(x=bean_type_simplified, fill=bean_type_simplified)) +
+    geom_bar(position="dodge", size=2) +
+    facet_wrap(c("company_location")) +
+    scale_y_log10()
+14. meanRatingByYear <- chocolateData %>%
+    group_by(review_date) %>%
+    summarise(meanRating=mean(rating))
+15. ggplot(data=meanRatingByYear, aes(x=review_date, y=meanRating)) +
+    geom_line() + 
+    theme_few()
