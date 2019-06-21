@@ -1,0 +1,108 @@
+Beginner - Getting Started in R - Vector
+1. Vector: a lost of data that all of the same data type
+2. Index starts at 1
+
+Beginner - Getting Started in R - Load data in R
+1. What type of data structure the data is in
+2. Where to find the data
+
+1.1 Data structure: A specific way of organizing data to store it. - lists, trees, vectors, data_frame (tibble)
+1.2 new data_frame (tibble) does not come with base R -> use package 'tidyverse'
+1.3 Package: a collection of special functions (and sometimes data)
+1.4 library(tidyverse)
+
+2.1 read_csv (comes with tidyverse)
+2.2 revise columns with space to without space 
+	2.1.1 replace space with dot: names(chocolateData)<- make.names(names(chocolateData), unique=TRUE)
+	2.1.2 replace space with _: names(chocolateData) <- gsub("[[:space:]+]", "_", names(chocolateData))
+1.7 data_frame has 2 dimensions (row and column) - but both dimensions are actually vectors - that means we can access specific cells in our data_frame using the indexes of values we're interested in
+1.8 chocolateData[6, 4]: RC - row, column
+1.9 chocolateData[6, ] - get evry cell in the 6th row
+1.10 chocolateData[6] - get the 6th column
+
+3. Remove unwanted data - use minus sign
+3.1 remove the first row: chocolateData[-1, ]
+
+Beginner - Getting Started in R - Summarize Data
+1. Check the data type: str()
+1.1 first row: class of the object and size 
+1.2 data_frame is tibble: a special type of data.frame
+1.3 abbreviated in str() as tbl
+1.4 1795 obs. of 9 variables: 1795 rows long and 9 columns wide
+1.5 In R, dollar sign ($) has a speical meaning - whatsever comes directly after it is a column in a data_frame - use this to look at specific columns in a data_frame
+1.6 Nine columns have $ signs just as 9 variables
+1.7 type of data in each column
+1.8 tidyverse has the function to automatically conver data types: type_convert
+1.9 type_convert: look at the first 1000 rows of each column, guess what the data type of that columns should be, then convert that column into that data type
+
+2. Remove the percent sign in a column
+2.1 chocolateData$Cocoa_Percent <- sapply(chocolateData$Cocoa_Percent, function(x) gsub("%", "", x))
+
+3. Summarizing Data
+3.1 summary(): comes from base R: summary(chocolateData)
+3.2 summarise_all(): comes from tidyverse: summarise_all(chocolateData, funs(mean))
+3.3 To use summarise_All, specify what function to use
+3.4 summarise_all(chocolateData, funs(sd))
+3.5 chocolateData %>%
+		summarise(avgRating = mean(Rating),
+				   sdRating = sd(Rating))
+3.6 continues on the next line: comma(,), pipe(%>%), plus sign(+)
+3.7 chocolateData%>%
+	group_by(Review_Date)%>%
+	summarise(avgRating = mean(Rating),
+			   sdRating = sd(Rating))
+
+Beginner - Getting Started in R - Graphing Data
+1 ggplot2: a part of the tidyverse collection of packafes
+1.2 gg: the grammar of graphics
+1.3 Plots in ggplot2 are built up using multiple functions connected with the plus sign (+)
+1.4. ggplot(): draws the outline of the plot (axes and tick marks)
+1.5 ggplot(dataset, aes()): ggplot takes 2 arguments
+1.6 aes(): a function, it takes multiple arguments. Arguments x&y tells the function which columns of the data_frame to plot on the x axis and y axis.
+1.7 ggplot(chocolateData, aes(x=Review_Date, y=Rating))
+	=> doesn't plot anything
+	=> add a geom layer 
+	=> There are lots of different geom layers and multiple layers can be added to the same plot
+	=> Different geoms require different aesthetics. If your code runs but doesn't return a plot, it's usually because you've given ggplot() one set of aesthetics, but the geom you're using need a different set. 
+	=> geom_histogram() only needs to know what to plot on the x axis.
+	=> If you tell it to plot something on the x axis and something else on the y axis, it won't return the plot you're expecting.
+1.8 ggplot(chocolateData, aes(x=Review_Date, y=Rating)) + geom_point()
+	=> scatter chart
+	=> dots layer on each other
+1.9 ggplot(chocolateData, aes(x=Review_Date, y=Rating)) + geom_point() +
+geom_jitter
+	=> scatter chart with a point for each data point and move each otehr slightly so they don't overlap
+1.10 ggplot(chocolateData, aes(x=Review_Date, y=Rating)) +
+geom_point() +
+geom_jitter() +
+geom_smooth(method = 'im')
+	=> see the trend
+	=> fit a linear model (lm)
+1.11 ggplot(chocolateData, aes(x=Review_Date, y=Rating, 
+	color=Cocoa_Percent)) +
+	geom_point() +
+	geom_jitter() +
+	geom_smooth(method='lm')
+
+2. Save individual files without codes
+2.1 Save the plot to a variable
+	chocolateRatingByReviewDate <- ggplot(chocolateData, aes(x=Review_Dae, y=Rating, color=Cocoa_Percent)) +
+	geom_point() +
+	geom_jitter() +
+	geom_smooth(method='lm')
+2.2 Save plot
+	ggsave("chocolateRatingByReviewDate.png",
+			plot=chocolateRatingByRevirwDate,
+			height=6, width=10, units="in")
+
+3. Other codes
+3.1 avgRatingByYear <- chocolateData %>%
+		group_by(Review_Date) %>%
+		summarise(avgRating = mean(Rating), sdRating = sd(Rating))
+
+	ggplot(avgRatingByYear, aes(y=avgRating, x=Review_Date)) + 
+		geom_point() +
+		geom_line()
+
+	ggtitle()
+

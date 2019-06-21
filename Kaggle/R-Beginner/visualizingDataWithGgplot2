@@ -1,0 +1,190 @@
+Beginner - Visualizing data with ggplot2
+1. ggplo2: a part of tidyverse
+2. Tidyverse: a collection of R packages built around the foundational idea about data in a table should have one variable per column, one observation per ro, and only one value per cell
+
+Beginner - Visualizing data with ggplo2 - The big idea behind ggplot2
+1. ggplo2 works a bit different from other R packages by design
+2. ggplot: the grammar of graphics
+3. ggplot() function itself doesn't actually plot anything
+	=> just creates the outline of the plot
+	=> to actually plot something in that outline
+	=> add a geom layer to our plot
+	=> ggplot(dataset, aes(xaxis, yaxis)) +
+		geom_something() +
+		geom_somethingElse()
+	=> First call ggplot() and pass it the dataset & aesthetics you want to plot
+	=> add the layer(s)
+	=> end a line with a plus sign
+	=> if ending a line without a plus sign, the plus sign goes to the beginning of a line would cause error
+	=> R doesn't expact lines to begin with +
+4. Three most popular layers
+4.1 geom_point()
+	=> scatter plot
+	=> each data point is represented by a point on the plot
+4.2 geom_bar()
+	=> bar chart
+	=> each bar shows the number of observations in a given category
+4.3 geom_line()
+	=> line plot
+	=> points are connected by a stright line
+
+Beginner - Visualizing data with ggplot2 - Set up the environment
+1. library(tidyverse)
+   library(ggthemes)   => includes pre-made theme
+   candyRankings <- read_csv("...")
+   candyProduction <- read_csv("...")
+
+Beginner - Visualizing data with ggplot2 - Scatter plots
+1. Scatter plot: Is there a ralationship betwwen price and sugar amount 
+1.1 Scatter plot
+	=> two axes, each representing a different variale
+	=> each individual observation is showing using a single point
+	=> the position of the point is determined by the value of the variables assigned to the x and y axes for that observation
+1.2 ggplot(data = candyRankings, aes(x=sugarpercent, y=pricepercent)) + # make a blank chart with a mapping for both the x and y aesthetic
+	geom_point() # add a layer of points
+1.3 fitted line
+	=> visually represent how cosely the variable on the x axis and the variable on the y axis are related to each other, and the strength of that relationship
+	=> a line reoresenting some function of x and y that has the best fit (or the smallest overall error) for the observed data
+1.4 geom_smooth()
+	=> add a fitted line
+	=> show the relationship between the x and y variables using locally weighted scatter plot smoothing (LOESS)
+	=> not a stright line
+1.5 geom_smooth(method='lm')
+	=> a single stright line
+	=> specify that we want geom_smooth() to fit a linear model
+1.6 ggplot(data=candyRankings, aes(x=sugarpercent, y=pricepercent)) +
+		geom_point() +
+		geom_smooth(method='lm')
+1.7 add labels (add another layer)
+	=> geom_text()
+	=> but geom_text() doesn't know what text to plot or where
+	=> add another aesthetic mapping 
+	=> ggplot(data=candyRankings, aes(x=sugarpercent, y=pricepercent, label=competitiorname)) +
+		geom_point() +
+		geom_smooth(method='lm') +
+		geom_text()
+1.8 Add an aesthetic that isn't used by any of the layers, ggplot2 will ignore it
+1.9 Not adding an aesthetic that one of the layers needs, no plot will be generate
+1.10 The label text is not readable, what to do?
+	=> ggplot(data=candyRankings, 
+		aes(x=sugarpercent, y=pricepercent, label=competitorname)) +
+		geom_point() +
+		geom_smooth(method='lm') +
+		geom_text(check_overlap=T,
+					vjust="bottom",
+					nudge_y=0.01,
+					angle=30, 
+					size=2) +
+		labs(title = "More sugary candies are more expensive",
+			x="Sugar content percentile",
+			y="Price pcercentile")
+	=> set up plot: ggplot()
+	=> add a layer of points: geom_point()
+	=> add a fitted line: geom_smooth(method='lm')
+	=> add labels to the points: geom_text()
+	=> automatically reduce overlap (deletes some labels): geom_text(check_overlap=T)
+	=> adjust the vertical orientation: vjust="bottom"
+	=> move the text up a bit so it doesn't touch the points: nudge_y = 0.01
+	=> tilt the text 30 degrees: angle= 30
+	=> make the text smaller (to reduce overlap more): size=2 
+	=> plot title: add anther layer labs()
+	=> plot title: title="..."
+	=> x axis label: x="Sugar content percentile"
+	=> y axis label: y="Price percentile"
+1.11 Another approach: remove the points and use labels as points
+	=> also remove the arguments from geom_text() to move lables so they don't overlap with the points
+	=> ggplot(data=candyRankings, 
+		aes(x=sugarpercent, y=pricepercent, label=competitorname, color=competitorname)) +
+		# geom_point() +
+		geom_smooth(method='lm') +
+		geom_text(check_overlap=T,
+				#	vjust="bottom",
+				#	nudge_y=0.01,
+					angle=30, 
+					size=2.5) +
+		labs(title = "More sugary candies are more expensive",
+			x="Sugar content percentile",
+			y="Price pcercentile")
+
+Beginnger - Visualizing data with ggplot2 - Bar charts
+1. Summary
+1.1 Scatter chart: numeric variables
+1.2 Bar chart: categorical variables along the x asis and the count of observations from each category on the y axis
+1.3 geom_bar()
+1.4 Initially aes() has one argument for the x axis
+1.5 The counts for the y axis are calculated automaticaly from data frame
+
+2. Basic bar chart
+2.1 Select the columns that have the features
+	candyFeatures <- candyRankings %>%
+						select(2:10) 
+2.2 Make sure hey are booleans (logical)
+	candyFeatures[] <- lapply(candyFeatures, as.logical)
+
+2.3 Make a bar plot to show how many candies have chocolate in them
+	ggplot(candyFeatures, aes(x=chocolate)) +
+		geom_bar()
+
+3. Is there a relationship between the number of candies which have chocolate vs. the number of candies which have caramel
+3.1 add an additional aesthetic to plot
+	=> color-code the bars by setting "fill" to caramel
+	=> Use fill instead of color
+3.2 Make a bar chart
+	ggplot(candyFeatures, aes(x=chocolate, fill=caramel)) +
+		geom_bar()
+3.3 Make a bar chart
+	ggplot(candyFeatures, aes(x=chocolate, fill=caramel)) +
+		geom_bar(position="dodge")
+3.4 Make a bar chart with facet_wrap()
+	ggplot(candyFeatures, aes(x=chocolate, fill=caramel)) +
+		geom_bar(position="dodge") +
+		facet_wrap(c("caramel"))
+3.5 Make a bar chart with color
+	ggplot(candyFeatures, aes(x=chocolate, fill=caramel)) +
+		geom_bar(position="dodge", size=2) +
+		facet_wrap(c("caramel")) +
+		scale_fill_manual(values=c("#BBBBBB", '#E69F00'))
+3.6 Make a bar chart with title and axis labels
+	ggplot(candyFeatures, aes(x=chocolate,
+								fill=caramel)) +
+		geom_bar(position="dodge", size=2) +
+		facet_wrap(c("caramel")) +
+		scale_fill_manual(values=c("#BBBBBB", '#E69F00')) +
+		labs(title="Chocolate candies have more caramel",
+			x="Chocolate?", y="Count of candies") +
+		theme(legend.position=c(0.9, 0.9),
+			strip.background = element_blank(),
+			strip.text.x = element_blank())
+
+Beginner - Visualizing data with ggplot2 - Line chart
+1. Summary
+1.1 Line chart: time series data - how a measurement has changed over time
+1.2 Time points: x axis
+1.3 Value for the measurement: y 
+
+2. Line chart
+2.1 ggplot(data=candyProduction, aes(x=observation_date, y=IPG3113N)) +
+	geom_line() + 
+	geom_smooth()
+2.2 tidyverse automatically parse dates
+2.3 Save the plot to a veriable
+	linePlot <- ggplot(data=candyProduction, aes(x=observation_date, y=IPG3113N)) +
+		geom_line() +
+		geom_smooth() +
+		labs(title="Monthly production", x="", y=As percent of 2012 production"")
+
+	x="": making the axis label blank will remove it
+2.2 Line chart with theme
+	linePlot + theme_economist()
+	linePlot + theme_fvethirtyeight()
+	linePlot + theme_few()
+	linePlot + theme_excel()
+
+4. geom_line()
+
+Beginner - Visualizing data with ggplot2 - workbook
+1. library(tidyverse)
+	library(ggthemes)
+	library(janitor)
+	library(stringr)
+2. clean_names(): convert column names to lower case with _
