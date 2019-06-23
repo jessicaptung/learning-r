@@ -211,6 +211,7 @@ Beginner - Visualizing data with ggplot2 - workbook
 	chocolateData_commonBeans <- chocolateData %>%
 	    filter(bean_type_simplified %in% commonBeanTypes$bean_type_simplified)
 11. Add data points on bars
+	To break stacked bar to aligned bar: position="dodge"
 	ggplot(data=chocolateData_commonBeans, aes(x=bean_type_simplified, fill=bean_type_simplified)) +
     geom_bar(position="dodge", size=2) +
     geom_text(stat='count', aes(label=..count..), vjust=-1)
